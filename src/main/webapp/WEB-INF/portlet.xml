@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<portlet-app xmlns="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd
+                                 http://java.sun.com/xml/ns/portlet/portlet-app_2_0.xsd"
+             version="2.0">
+
+  <portlet>
+    <portlet-name>SimpleMvcPortlet</portlet-name>
+    <display-name>Simple MVC Portlet (JSP)</display-name>
+    <portlet-class>br.com.wagner.portlet.SimpleMvcPortlet</portlet-class>
+
+    <supports>
+      <mime-type>text/html</mime-type>
+      <portlet-mode>view</portlet-mode>
+    </supports>
+
+    <portlet-info>
+      <title>Simple MVC Portlet</title>
+      <short-title>MVC Portlet</short-title>
+      <keywords>pluto, websphere, jsr286, portlet2</keywords>
+    </portlet-info>
+
+    <!-- Opcional: parâmetros de init -->
+    <init-param>
+      <name>exampleParam</name>
+      <value>hello</value>
+    </init-param>
+  </portlet>
+
+</portlet-app>

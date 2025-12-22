@@ -1,0 +1,16 @@
+/* Simple neutral styling (no portal-specific classes) */
+.p-card{font-family:Arial, sans-serif; border:1px solid #e3e3e3; border-radius:12px; padding:16px; background:#fff;}
+.p-header h3{margin:0 0 6px 0;}
+.p-sub{margin:0 0 12px 0; color:#555; font-size:13px;}
+.p-alert{padding:10px 12px; border:1px solid #d9e7ff; background:#f3f7ff; border-radius:10px; margin-bottom:12px;}
+.p-form{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+.p-form input{flex:1 1 220px; padding:8px 10px; border:1px solid #ccc; border-radius:10px;}
+.p-form button{padding:8px 12px; border:1px solid #bbb; border-radius:10px; background:#fafafa; cursor:pointer;}
+.p-form button:hover{background:#f1f1f1;}
+.p-hr{border:none; border-top:1px solid #eee; margin:14px 0;}
+.p-row{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+.p-secondary{padding:8px 12px; border:1px solid #bbb; border-radius:10px; background:#fff; cursor:pointer;}
+.p-secondary:hover{background:#f7f7f7;}
+.p-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; color:#333;}
+.p-footnote{margin-top:12px; color:#666; font-size:12px;}
+code{background:#f6f6f6; padding:1px 4px; border-radius:6px;}
