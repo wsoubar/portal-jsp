@@ -9,40 +9,70 @@ import java.util.Map;
 
 /**
  * Portlet 2.0 (JSR-286) "MVC simples":
- * - doView() -> encaminha para JSP (VIEW)
- * - processAction() -> processa POST/Action e define render parameters
- * - serveResource() -> endpoint para AJAX/JSON (RESOURCE) e também serve recursos estáticos (CSS) via resourceId
+ * - doView() -> escolhe qual JSP renderizar (view.jsp ou chat.jsp)
+ * - processAction() -> recebe o POST do formulário (Avançar), valida e guarda em sessão
+ * - serveResource() -> mantém seu endpoint JSON e recursos estáticos (se você usar)
  *
  * Compatível com Pluto e WebSphere Portal 9/DX quando você mantém apenas javax.portlet.*.
  */
 public class SimpleMvcPortlet extends GenericPortlet {
 
-    private static final String JSP_VIEW = "/WEB-INF/jsp/view.jsp";
     private final Gson gson = new Gson();
 
     @Override
     protected void doView(RenderRequest request, RenderResponse response)
             throws PortletException, IOException {
 
-        response.setContentType("text/html;charset=UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
 
-        String lastMessage = request.getParameter("lastMessage");
-        if (lastMessage != null) {
-            request.setAttribute("lastMessage", lastMessage);
+        // Copia o que está na sessão do portlet para o request (para EL nas JSPs).
+        PortletSession session = request.getPortletSession(false);
+        if (session != null) {
+            request.setAttribute("userName", session.getAttribute("userName", PortletSession.PORTLET_SCOPE));
+            request.setAttribute("userPhone", session.getAttribute("userPhone", PortletSession.PORTLET_SCOPE));
+            request.setAttribute("acceptedTerms", session.getAttribute("acceptedTerms", PortletSession.PORTLET_SCOPE));
         }
 
-        PortletRequestDispatcher dispatcher = getPortletContext().getRequestDispatcher(JSP_VIEW);
-        dispatcher.include(request, response);
+        // Navegação por render parameter: view=chat -> chat.jsp, senão -> view.jsp
+        String view = request.getParameter("view");
+        String jsp = "chat".equals(view) ? "/WEB-INF/jsp/chat.jsp" : "/WEB-INF/jsp/view.jsp";
+
+        getPortletContext().getRequestDispatcher(jsp).include(request, response);
     }
 
     @Override
     public void processAction(ActionRequest request, ActionResponse response)
             throws PortletException, IOException {
 
-        String msg = request.getParameter("message");
-        if (msg == null) msg = "";
+        // Form (view.jsp) -> botão "Avançar"
+        String name = trimToEmpty(request.getParameter("name"));
+        String phone = trimToEmpty(request.getParameter("phone"));
+        boolean accepted = request.getParameter("acceptTerms") != null;
 
-        response.setRenderParameter("lastMessage", msg.trim());
+        // Validação mínima (ajuste conforme sua regra)
+        if (name.isEmpty() || phone.isEmpty() || !accepted) {
+            response.setRenderParameter("error", "Preencha Nome e Telefone e aceite os termos para continuar.");
+            response.setRenderParameter("view", "home");
+
+            // Prefill para não “perder” o que foi digitado
+            response.setRenderParameter("prefillName", name);
+            response.setRenderParameter("prefillPhone", phone);
+            if (accepted) response.setRenderParameter("prefillAccepted", "true");
+            return;
+        }
+
+        // Guarda em sessão do portlet (escopo PORTLET_SCOPE)
+        PortletSession session = request.getPortletSession(true);
+        session.setAttribute("userName", name, PortletSession.PORTLET_SCOPE);
+        session.setAttribute("userPhone", phone, PortletSession.PORTLET_SCOPE);
+        session.setAttribute("acceptedTerms", Boolean.TRUE, PortletSession.PORTLET_SCOPE);
+
+        // Vai para o chat.jsp
+        response.setRenderParameter("view", "chat");
+    }
+
+    private String trimToEmpty(String s) {
+        return s == null ? "" : s.trim();
     }
 
     @Override
@@ -94,9 +124,7 @@ public class SimpleMvcPortlet extends GenericPortlet {
         }
 
         String contentType = guessContentType(path);
-        if (contentType != null) {
-            response.setContentType(contentType);
-        }
+        if (contentType != null) response.setContentType(contentType);
 
         response.getCacheControl().setExpirationTime(0);
 
