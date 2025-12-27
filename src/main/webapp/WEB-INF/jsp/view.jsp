@@ -59,6 +59,10 @@
     </div>
 
     <div class="p-row">
+      <pre>* Campos obrigatórios</pre>
+    </div>
+
+    <div class="p-row">
       <button type="submit">Avançar</button>
     </div>
 

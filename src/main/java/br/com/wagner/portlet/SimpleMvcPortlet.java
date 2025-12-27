@@ -6,11 +6,13 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.GenericPortlet;
 import javax.portlet.PortletException;
+import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
@@ -30,6 +32,7 @@ import com.google.gson.Gson;
 public class SimpleMvcPortlet extends GenericPortlet {
 
     private final Gson gson = new Gson();
+    private Logger logger = Logger.getLogger(SimpleMvcPortlet.class.getName());
 
     @Override
     protected void doView(RenderRequest request, RenderResponse response)
@@ -98,26 +101,113 @@ public class SimpleMvcPortlet extends GenericPortlet {
             return;
         }
 
-        // 2) JSON para AJAX (ex.: action=ping)
+        // 2) Roteamento por action (JSON)
         String action = request.getParameter("action");
         if (action == null) action = "";
+        action = action.trim().toLowerCase();
+
+        logger.info("Processing action: " + action);
 
         response.setContentType("application/json;charset=UTF-8");
         response.getCacheControl().setExpirationTime(0);
 
         Map<String, Object> payload = new HashMap<>();
-        payload.put("ok", true);
         payload.put("action", action);
 
-        if ("ping".equalsIgnoreCase(action)) {
-            payload.put("message", "pong");
-        } else {
-            payload.put("message", "unknown action");
+        try {
+            Map<String, Object> result;
+
+            switch (action) {
+                case "ping":
+                    result = pingResult();
+                    payload.put("ok", true);
+                    payload.putAll(result);
+                    break;
+
+                case "getwsurl":
+                    result = getWsUrlResult(request);
+                    payload.put("ok", true);
+                    payload.putAll(result);
+                    break;
+
+                case "sessioninfo":
+                    result = sessionInfoResult(request);
+                    payload.put("ok", true);
+                    payload.putAll(result);
+                    break;
+
+                case "":
+                    // sem action
+                    payload.put("ok", false);
+                    payload.put("message", "missing action");
+                    response.setProperty(ResourceResponse.HTTP_STATUS_CODE, "400");
+                    break;
+
+                default:
+                    payload.put("ok", false);
+                    payload.put("message", "unknown action: " + action);
+                    response.setProperty(ResourceResponse.HTTP_STATUS_CODE, "400");
+                    break;
+            }
+
+        } catch (Exception ex) {
+            payload.put("ok", false);
+            payload.put("message", "error processing action: " + action);
+            payload.put("details", ex.getMessage());
+            response.setProperty(ResourceResponse.HTTP_STATUS_CODE, "500");
         }
 
         try (PrintWriter out = response.getWriter()) {
             out.print(gson.toJson(payload));
         }
+    }
+
+    private Map<String, Object> pingResult() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("message", "pong");
+        return result;
+    }
+
+    /**
+     * Exemplo: obtém a URL do websocket (pode vir de serviço externo).
+     * Aqui eu deixei com cache em sessão (PORTLET_SCOPE).
+     */
+    private Map<String, Object> getWsUrlResult(ResourceRequest request) {
+        PortletSession session = request.getPortletSession(true);
+
+        String wsUrl = (String) session.getAttribute("wsUrl", PortletSession.PORTLET_SCOPE);
+        if (wsUrl == null || wsUrl.trim().isEmpty()) {
+            wsUrl = callServiceToGetWsUrl(request); // implemente com seu serviço
+            session.setAttribute("wsUrl", wsUrl, PortletSession.PORTLET_SCOPE);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("wsUrl", wsUrl);
+        return result;
+    }
+
+    private String callServiceToGetWsUrl(PortletRequest request) {
+        // TODO: chamar REST/SOAP e retornar a URL real
+        return "wss://echo.websocket.events"; // exemplo
+    }
+
+    /**
+     * Exemplo: retorna informações guardadas na sessão do portlet.
+     */
+    private Map<String, Object> sessionInfoResult(ResourceRequest request) {
+        PortletSession session = request.getPortletSession(false);
+
+        Map<String, Object> result = new HashMap<>();
+        if (session == null) {
+            result.put("hasSession", false);
+            return result;
+        }
+
+        result.put("hasSession", true);
+        result.put("userName", session.getAttribute("userName", PortletSession.PORTLET_SCOPE));
+        result.put("userPhone", session.getAttribute("userPhone", PortletSession.PORTLET_SCOPE));
+        result.put("acceptedTerms", session.getAttribute("acceptedTerms", PortletSession.PORTLET_SCOPE));
+        return result;
     }
 
     private void serveStatic(ResourceRequest request, ResourceResponse response) throws IOException {
