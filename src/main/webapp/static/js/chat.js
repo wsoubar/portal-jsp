@@ -19,8 +19,12 @@
       console.log("[AJAX] Chamando ping automaticamente...");
 
       const resp = await fetch(cfg.ajaxTestUrl, {
-        method: "GET",
-        credentials: "same-origin"
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json;charset=UTF-8"
+        },
+        body: JSON.stringify({ message: "ping" })
       });
 
       if (!resp.ok) {

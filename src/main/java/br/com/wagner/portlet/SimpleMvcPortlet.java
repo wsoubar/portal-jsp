@@ -1,5 +1,6 @@
 package br.com.wagner.portlet;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -107,6 +108,32 @@ public class SimpleMvcPortlet extends GenericPortlet {
         action = action.trim().toLowerCase();
 
         logger.info("Processing action: " + action);
+        
+        /*
+         * Captura de payload JSON (se necessário)
+         * Exemplo de corpo: { "message": "ping" }
+         */
+
+        Gson gson = new Gson();
+
+        // 1️⃣ Ler o body
+        StringBuilder body = new StringBuilder();
+        try (BufferedReader reader = request.getReader()) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                body.append(line);
+            }
+        }
+        logger.info("Body recebida: " + body);
+        // 2️⃣ Converter JSON → Map
+        Map<String, Object> data = gson.fromJson(body.toString(), Map.class);
+
+        String message = (String) data.get("message");
+        logger.info("Mensagem recebida: " + message);
+
+        /*
+         * Fim da captura de payload JSON
+        */
 
         response.setContentType("application/json;charset=UTF-8");
         response.getCacheControl().setExpirationTime(0);
