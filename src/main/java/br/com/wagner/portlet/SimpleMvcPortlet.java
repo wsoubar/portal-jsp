@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.GenericPortlet;
+import javax.portlet.PortletConfig;
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
@@ -20,7 +21,12 @@ import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
 import com.google.gson.Gson;
+
+import br.com.wagner.portlet.config.AppConfig;
+import br.com.wagner.service.ChatService;
 
 /**
  * Portlet 2.0 (JSR-286) "MVC simples":
@@ -34,6 +40,18 @@ public class SimpleMvcPortlet extends GenericPortlet {
 
     private final Gson gson = new Gson();
     private Logger logger = Logger.getLogger(SimpleMvcPortlet.class.getName());
+
+    AnnotationConfigApplicationContext appContext;
+    
+    ChatService chatService;
+
+    @Override
+    public void init(PortletConfig config) throws PortletException {
+        super.init(config);
+        appContext = new AnnotationConfigApplicationContext(AppConfig.class);
+        chatService = appContext.getBean(ChatService.class);
+        logger.info(chatService.getWelcomeMessage()); // exemplo de uso
+    }
 
     @Override
     protected void doView(RenderRequest request, RenderResponse response)
