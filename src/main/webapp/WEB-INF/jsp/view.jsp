@@ -48,6 +48,7 @@
 
     <div class="p-field">
       <label class="p-check">
+      </label>
         <input
           id="<portlet:namespace/>acceptTerms"
           name="acceptTerms"
@@ -55,7 +56,6 @@
           <c:if test="${param.prefillAccepted eq 'true' || acceptedTerms == true}">checked</c:if>
         />
         Aceito os termos
-      </label>
     </div>
 
     <div class="p-row">

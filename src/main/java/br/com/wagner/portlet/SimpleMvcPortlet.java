@@ -132,7 +132,7 @@ public class SimpleMvcPortlet extends GenericPortlet {
          * Exemplo de corpo: { "message": "ping" }
          */
 
-        Gson gson = new Gson();
+        // Gson gson = new Gson();
 
         // 1️⃣ Ler o body
         StringBuilder body = new StringBuilder();
@@ -143,7 +143,9 @@ public class SimpleMvcPortlet extends GenericPortlet {
             }
         }
         logger.info("Body recebida: " + body);
+
         // 2️⃣ Converter JSON → Map
+        @SuppressWarnings("unchecked")
         Map<String, Object> data = gson.fromJson(body.toString(), Map.class);
 
         String message = (String) data.get("message");
@@ -232,7 +234,6 @@ public class SimpleMvcPortlet extends GenericPortlet {
     }
 
     private String callServiceToGetWsUrl(PortletRequest request) {
-        // TODO: chamar REST/SOAP e retornar a URL real
         return "wss://echo.websocket.events"; // exemplo
     }
 
