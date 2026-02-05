@@ -95,7 +95,12 @@
 
     ws.addEventListener("message", (event) => {
       setStatus("message");
-      log("[RECEBIDO] " + event.data, "received");
+      let mensagem = event.data;
+      log("[RECEBIDO] " + mensagem, "received");
+      if (mensagem.startsWith("http")) {
+        window.open(mensagem, "_blank", "noopener");
+      }
+
     });
 
     ws.addEventListener("close", (event) => {

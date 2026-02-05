@@ -4,7 +4,7 @@
 
 <portlet:defineObjects />
 
-<link rel="stylesheet" href="<portlet:resourceURL id='static'><portlet:param name='path' value='/static/portlet.css'/></portlet:resourceURL>"/>
+<link rel="stylesheet" href="<portlet:resourceURL id='static'><portlet:param name='path' value='/static/css/portlet.css'/></portlet:resourceURL>"/>
 
 <div class="p-card">
   <div class="p-header">
