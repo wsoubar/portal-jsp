@@ -5,16 +5,23 @@ Este projeto é um esqueleto **portável** para rodar em:
 - WebSphere Portal Server 9 / HCL Digital Experience (DX) 9
 
 ## Requisitos
-- Java 8
+- JDK 25 para o build descrito abaixo; ambiente de execução compatível com Java 8
 - Maven 3.x
 
 ## Build
+O Maven usa o JDK indicado por `JAVA_HOME`, que pode continuar apontando para o
+JDK 25. O Maven Compiler Plugin 3.13.0 está configurado com `release=8`:
+o compilador limita a sintaxe, as APIs da plataforma Java e o bytecode ao Java 8
+(major version 52). Não é necessário instalar ou selecionar um JDK 8.
+
 ```bash
 mvn clean package
 ```
 
 Vai gerar:
 - `target/portlet-sample.war`
+
+Essa compilação não substitui a validação do WAR no portal de destino com Java 8.
 
 ## Estrutura
 - `src/main/java/.../SimpleMvcPortlet.java` -> GenericPortlet (doView, processAction, serveResource)
